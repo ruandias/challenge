@@ -18,6 +18,11 @@ namespace TaskManagement.Infrastructure.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<ProjectEntity>()
+                 .Property(p => p.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            modelBuilder.Entity<ProjectEntity>()
                 .HasOne(p => p.User)
                 .WithMany(u => u.Projects)
                 .HasForeignKey(p => p.UserId);
