@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TaskManagement.Core.DTOs.Report;
 using TaskManagement.Core.Entities;
 using TaskManagement.Core.Repositories;
 using TaskManagement.Infrastructure.Data;
@@ -14,13 +15,26 @@ namespace TaskManagement.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<List<TaskEntity>> GetTasksCompletedInLast30DaysAsync()
+        public async Task<List<UserTaskPerformanceDto>> GetUserTaskPerformanceReportAsync()
         {
             var last30Days = DateTime.UtcNow.AddDays(-30);
 
-            return await _context.Tasks
+            var completedTasks = await _context.Tasks
+                .Include(task => task.Project)
                 .Where(task => task.Status == "Completed" && task.DueDate >= last30Days)
                 .ToListAsync();
+
+            var averageTasksByUser = completedTasks
+              .Where(task => task.Project != null)
+              .GroupBy(task => task.Project.UserId)
+              .Select(group => new UserTaskPerformanceDto
+              {
+                  UserId = group.Key,
+                  AverageTasksCompleted = group.Count()
+              })
+              .ToList();
+
+            return averageTasksByUser;
         }
     }
 }

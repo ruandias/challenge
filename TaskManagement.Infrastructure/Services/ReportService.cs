@@ -28,19 +28,7 @@ namespace TaskManagement.Infrastructure.Services
                 };
             }
 
-            var last30Days = DateTime.UtcNow.AddDays(-30);
-
-            var completedTasks = await _taskRepository.GetTasksCompletedInLast30DaysAsync();
-
-            var averageTasksByUser = completedTasks
-                .Where(task => task.DueDate >= last30Days)
-                .GroupBy(task => task.Project.UserId)
-                .Select(group => new UserTaskPerformanceDto
-                {
-                    UserId = group.Key,
-                    AverageTasksCompleted = group.Count()
-                })
-                .ToList();
+            var averageTasksByUser = await _taskRepository.GetUserTaskPerformanceReportAsync();
 
             var response = new AppResponse<List<UserTaskPerformanceDto>>()
             {

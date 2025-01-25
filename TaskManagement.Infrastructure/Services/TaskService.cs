@@ -16,11 +16,13 @@ namespace TaskManagement.Infrastructure.Services
         public TaskService(
             IRepository<TaskEntity> taskRepository,
             IRepository<ProjectEntity> projectRepository,
-            IRepository<TaskHistoryEntity> historyRepository)
+            IRepository<TaskHistoryEntity> historyRepository,
+            IRepository<CommentEntity> commentRepository)
         {
             _taskRepository = taskRepository;
             _projectRepository = projectRepository;
             _historyRepository = historyRepository;
+            _commentRepository = commentRepository;
         }
 
         public async Task<AppResponse<IEnumerable<TaskDto>>> GetTasksByProjectAsync(Guid projectId)
@@ -128,7 +130,7 @@ namespace TaskManagement.Infrastructure.Services
                 Errors = null,
                 Message = "Created",
                 StatusCode = 201,
-                Success = false
+                Success = true
             };
 
             return response;

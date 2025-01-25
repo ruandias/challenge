@@ -1,9 +1,9 @@
-﻿using TaskManagement.Core.Entities;
+﻿using TaskManagement.Core.DTOs.Report;
 
 namespace TaskManagement.Core.Repositories
 {
     public interface ITaskRepository
     {
-        Task<List<TaskEntity>> GetTasksCompletedInLast30DaysAsync();
+        Task<List<UserTaskPerformanceDto>> GetUserTaskPerformanceReportAsync();
     }
 }

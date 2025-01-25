@@ -1,4 +1,5 @@
-﻿using TaskManagement.Core.Contracts;
+﻿using Microsoft.IdentityModel.Tokens;
+using TaskManagement.Core.Contracts;
 using TaskManagement.Core.DTOs.Project;
 using TaskManagement.Core.Entities;
 using TaskManagement.Core.Responses;
@@ -50,6 +51,18 @@ namespace TaskManagement.Infrastructure.Services
 
         public async Task<AppResponse<ProjectDto>> CreateProjectAsync(CreateProjectDto projectDto)
         {
+            if (projectDto.Name.IsNullOrEmpty())
+            {
+                return new AppResponse<ProjectDto>()
+                {
+                    Data = null,
+                    Message = "BadRequest",
+                    Errors = new List<string> { "Invalid project name" },
+                    StatusCode = 400,
+                    Success = false
+                };
+            }
+
             var projectEntity = new ProjectEntity
             {
                 Id = Guid.NewGuid(),
@@ -92,9 +105,9 @@ namespace TaskManagement.Infrastructure.Services
 
             if (project == null)
             {
-                new AppResponse<string>
+                return new AppResponse<string>
                 {
-                    Success = true,
+                    Success = false,
                     Data = null,
                     Errors = new List<string>() { "Project not found"},
                     Message = "NotFound",
@@ -104,11 +117,11 @@ namespace TaskManagement.Infrastructure.Services
 
             if (project.Tasks.Any(t => t.Status == "Pending"))
             {
-                new AppResponse<string>
+                return new AppResponse<string>
                 {
-                    Success = true,
+                    Success = false,
                     Data = null,
-                    Errors = new List<string>() { "Cannot delete a project with pending tasks." },
+                    Errors = new List<string>() { "Cannot delete a project with pending tasks" },
                     Message = "InternalServerError",
                     StatusCode = 500
                 };
