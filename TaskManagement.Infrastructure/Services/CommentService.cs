@@ -9,13 +9,16 @@ namespace TaskManagement.Infrastructure.Services
     {
         private readonly IRepository<TaskEntity> _taskRepository;
         private readonly IRepository<CommentEntity> _commentRepository;
+        private readonly IRepository<TaskHistoryEntity> _historyRepository;
 
         public CommentService(
             IRepository<TaskEntity> taskRepository, 
-            IRepository<CommentEntity> commentRepository)
+            IRepository<CommentEntity> commentRepository,
+            IRepository<TaskHistoryEntity> historyRepository)
         {
             _taskRepository = taskRepository;
             _commentRepository = commentRepository;
+            _historyRepository = historyRepository;
         }
 
         public async Task<AppResponse<CommentDto>> AddCommentAsync(Guid taskId, string content, Guid userId)
@@ -45,16 +48,18 @@ namespace TaskManagement.Infrastructure.Services
 
             await _commentRepository.AddAsync(comment);
 
-            task.Histories.Add(new TaskHistoryEntity
+            var history = new TaskHistoryEntity
             {
                 Id = Guid.NewGuid(),
                 TaskId = taskId,
                 ChangeDescription = content,
                 ChangeDate = DateTime.UtcNow,
                 UserId = userId
-            });
+            };
 
-            await _taskRepository.UpdateAsync(task);
+            await _historyRepository.AddAsync(history);
+
+            await _commentRepository.SaveChangesAsync();
 
 
             var commentDto = new CommentDto()
